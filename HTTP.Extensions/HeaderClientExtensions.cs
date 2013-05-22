@@ -14,18 +14,12 @@ namespace HTTP.Extensions
             var value = response.Headers[header];
             if (value == null) return null;
 
-            DateTime dateTime;
-            if (!DateTime.TryParseExact(value, "r", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out dateTime))
-            {
-                return null;
-            }
-
-            return dateTime;
+            return value.AsHttpDateTime();
         }
 
         public static void SetDateTimeHeader(this HttpWebRequest request, string header, DateTime value)
         {
-            request.Headers[header] = value.ToString("r", CultureInfo.InvariantCulture);
+            request.Headers[header] = value.AsHttpDateTime();
         }
     }
 }

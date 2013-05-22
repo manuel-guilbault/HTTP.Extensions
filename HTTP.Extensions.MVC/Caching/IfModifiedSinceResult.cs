@@ -9,16 +9,27 @@ namespace HTTP.Extensions.MVC.Caching
 {
     public class IfModifiedSinceResult : ActionResult
     {
-        private Lazy<ActionResult> decoratedResult;
         private Lazy<DateTime> lastModified;
+        private Lazy<ActionResult> decoratedResult;
 
-        public IfModifiedSinceResult(Lazy<ActionResult> decoratedResult, Lazy<DateTime> lastModified)
+        public IfModifiedSinceResult(Lazy<DateTime> lastModified, Lazy<ActionResult> decoratedResult)
         {
-            if (decoratedResult == null) throw new ArgumentNullException("decoratedResult");
             if (lastModified == null) throw new ArgumentNullException("lastModified");
+            if (decoratedResult == null) throw new ArgumentNullException("decoratedResult");
 
-            this.decoratedResult = decoratedResult;
             this.lastModified = lastModified;
+            this.decoratedResult = decoratedResult;
+        }
+
+        protected virtual void ExecuteResultWhenModified(ControllerContext context)
+        {
+            context.HttpContext.Response.SetLastModified(lastModified.Value);
+            decoratedResult.Value.ExecuteResult(context);
+        }
+
+        protected virtual void ExecuteResultWhenUnmodified(ControllerContext context)
+        {
+            context.HttpContext.Response.StatusCode = 304; // Not Modified
         }
 
         public override void ExecuteResult(ControllerContext context)
@@ -26,13 +37,13 @@ namespace HTTP.Extensions.MVC.Caching
             if (context == null) throw new ArgumentNullException("context");
 
             var ifModifiedSince = context.HttpContext.Request.GetIfModifiedSince();
-            if (ifModifiedSince != null && ifModifiedSince <= lastModified.Value)
+            if (ifModifiedSince == null || lastModified.Value > ifModifiedSince)
             {
-                context.HttpContext.Response.StatusCode = 304; // Not Modified
+                ExecuteResultWhenModified(context);
             }
             else
             {
-                decoratedResult.Value.ExecuteResult(context);
+                ExecuteResultWhenUnmodified(context);
             }
         }
     }

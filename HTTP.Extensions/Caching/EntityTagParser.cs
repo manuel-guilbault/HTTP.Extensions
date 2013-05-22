@@ -5,54 +5,26 @@ using System.Text;
 
 namespace HTTP.Extensions.Caching
 {
-    public class EntityTagParser : ParserBase, IHeaderParser<IEnumerable<EntityTag>>
+    public class EntityTagParser : EntityTagParserBase, IHeaderParser<EntityTag>
     {
-        private const string ANY_FLAG = "*";
-        private const string WEAK_FLAG = "W/";
-        private const string QUOTE = "\"";
-        private const string COMMA = ",";
-
-        public IEnumerable<EntityTag> Parse(string value)
+        public EntityTag Parse(string value)
         {
-            Initialize(value);
-
-            if (value.Trim() == ANY_FLAG)
+            try
             {
-                return new[] { EntityTag.Any };
+                Initialize(value);
+
+                var result = ParseEntityTag();
+                if (!IsAtEnd()) throw new ParserException();
+                return result;
             }
-
-            return ParseEntityTags().ToArray();
-        }
-
-        protected IEnumerable<EntityTag> ParseEntityTags()
-        {
-            if (!IsAtEnd())
+            catch (ParserException)
             {
-                yield return ParseEntityTag();
+                throw;
             }
-
-            while (!IsAtEnd())
+            catch (Exception e)
             {
-                SkipWhiteSpaces();
-                Read(COMMA);
-                SkipWhiteSpaces();
-                yield return ParseEntityTag();
+                throw new ParserException();
             }
-        }
-
-        protected EntityTag ParseEntityTag()
-        {
-            bool isWeak = false;
-
-            if (Peek(WEAK_FLAG))
-            {
-                isWeak = true;
-                Read(WEAK_FLAG.Length);
-            }
-            Read(QUOTE);
-            var tag = ReadUntil(QUOTE);
-            Read(QUOTE);
-            return new EntityTag(isWeak, tag);
         }
     }
 }

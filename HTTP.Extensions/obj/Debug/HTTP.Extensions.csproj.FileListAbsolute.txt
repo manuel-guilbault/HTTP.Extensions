@@ -1,0 +1,5 @@
+C:\dev\GitHub\HTTP.Extensions\HTTP.Extensions\bin\Debug\HTTP.Extensions.dll
+C:\dev\GitHub\HTTP.Extensions\HTTP.Extensions\bin\Debug\HTTP.Extensions.pdb
+C:\dev\GitHub\HTTP.Extensions\HTTP.Extensions\obj\Debug\HTTP.Extensions.csprojResolveAssemblyReference.cache
+C:\dev\GitHub\HTTP.Extensions\HTTP.Extensions\obj\Debug\HTTP.Extensions.dll
+C:\dev\GitHub\HTTP.Extensions\HTTP.Extensions\obj\Debug\HTTP.Extensions.pdb

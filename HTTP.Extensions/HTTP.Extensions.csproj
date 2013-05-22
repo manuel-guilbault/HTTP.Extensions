@@ -41,19 +41,45 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\EntityTag.cs" />
+    <Compile Include="Caching\EntityTagComparisonType.cs" />
+    <Compile Include="Caching\EntityTagCondition.cs" />
+    <Compile Include="Caching\EntityTagConditionParser.cs" />
     <Compile Include="Caching\EntityTagParser.cs" />
+    <Compile Include="Caching\EntityTagParserBase.cs" />
     <Compile Include="Caching\ExpirationHeaders.cs" />
     <Compile Include="Caching\ExpirationClientExtensions.cs" />
     <Compile Include="Caching\ExpirationServerExtensions.cs" />
     <Compile Include="Caching\ValidationClientExtensions.cs" />
     <Compile Include="Caching\ValidationHeaders.cs" />
     <Compile Include="Caching\ValidationServerExtensions.cs" />
+    <Compile Include="DateTimeExtensions.cs" />
     <Compile Include="HeaderClientExtensions.cs" />
     <Compile Include="HeaderServerExtensions.cs" />
     <Compile Include="IHeaderParser.cs" />
     <Compile Include="ParserBase.cs" />
     <Compile Include="ParserException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Ranges\AcceptRange.cs" />
+    <Compile Include="Ranges\AcceptRangeParser.cs" />
+    <Compile Include="Ranges\ClientExtensions.cs" />
+    <Compile Include="Ranges\ClosedSubRange.cs" />
+    <Compile Include="Ranges\ContentRangeParser.cs" />
+    <Compile Include="Ranges\ContentRange.cs" />
+    <Compile Include="Ranges\ContentSubRange.cs" />
+    <Compile Include="Ranges\IfRange.cs" />
+    <Compile Include="Ranges\IfRangeEntityTag.cs" />
+    <Compile Include="Ranges\IfRangeLastModified.cs" />
+    <Compile Include="Ranges\IfRangeParser.cs" />
+    <Compile Include="Ranges\InstanceLength.cs" />
+    <Compile Include="Ranges\PrefixSubRange.cs" />
+    <Compile Include="Ranges\RangeUnitRegistry.cs" />
+    <Compile Include="Ranges\ServerExtensions.cs" />
+    <Compile Include="Ranges\ISubRange.cs" />
+    <Compile Include="Ranges\RangeHeaders.cs" />
+    <Compile Include="Ranges\Range.cs" />
+    <Compile Include="Ranges\RangeParser.cs" />
+    <Compile Include="Ranges\RangeUnit.cs" />
+    <Compile Include="Ranges\SuffixSubRange.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

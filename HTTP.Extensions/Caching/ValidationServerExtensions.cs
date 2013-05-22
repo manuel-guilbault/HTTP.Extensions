@@ -15,14 +15,14 @@ namespace HTTP.Extensions.Caching
             response.Headers[ValidationHeaders.E_TAG] = etag.ToString();
         }
 
-        public static IEnumerable<EntityTag> GetIfMatch(this HttpRequestBase request)
+        public static EntityTagCondition GetIfMatch(this HttpRequestBase request)
         {
-            return request.GetEntityTags(ValidationHeaders.IF_MATCH);
+            return request.GetEntityTagCondition(ValidationHeaders.IF_MATCH);
         }
 
-        public static IEnumerable<EntityTag> GetIfNoneMatch(this HttpRequestBase request)
+        public static EntityTagCondition GetIfNoneMatch(this HttpRequestBase request)
         {
-            return request.GetEntityTags(ValidationHeaders.IF_NONE_MATCH);
+            return request.GetEntityTagCondition(ValidationHeaders.IF_NONE_MATCH);
         }
     }
 }

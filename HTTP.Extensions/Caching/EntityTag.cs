@@ -8,8 +8,6 @@ namespace HTTP.Extensions.Caching
 {
     public class EntityTag
     {
-        public static readonly EntityTag Any = new AnyEntityTag();
-
         private bool isWeak;
         private string value;
 
@@ -39,6 +37,23 @@ namespace HTTP.Extensions.Caching
             get { return value; }
         }
 
+        public bool Equals(EntityTag other, EntityTagComparisonType comparisonType)
+        {
+            if (other == null) return false;
+
+            switch (comparisonType)
+            {
+                case EntityTagComparisonType.Strong:
+                    return !IsWeak && !other.IsWeak && Value == other.Value;
+
+                case EntityTagComparisonType.Weak:
+                    return Value == other.Value;
+
+                default:
+                    throw new InvalidProgramException("Unknown EntityTagComparisonType." + comparisonType);
+            }
+        }
+
         public override string ToString()
         {
             if (stringValue == null)
@@ -61,36 +76,6 @@ namespace HTTP.Extensions.Caching
             builder.Append("\"");
             builder.Append(value);
             builder.Append("\"");
-        }
-    }
-
-    internal class AnyEntityTag : EntityTag
-    {
-        public AnyEntityTag()
-            : base("*")
-        {
-        }
-
-        internal override void Append(StringBuilder builder)
-        {
- 	         builder.Append("*");
-        }
-    }
-
-    public static class EntityTagExtensions
-    {
-        public static string ToString(this IEnumerable<EntityTag> entityTags)
-        {
-            var builder = new StringBuilder();
-            foreach (var entityTag in entityTags)
-            {
-                if (builder.Length > 0)
-                {
-                    builder.Append(", ");
-                }
-                entityTag.Append(builder);
-            }
-            return builder.ToString();
         }
     }
 }

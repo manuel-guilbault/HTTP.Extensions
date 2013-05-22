@@ -68,11 +68,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Caching\ControllerExtensions.cs" />
     <Compile Include="Caching\IfMatchResult.cs" />
     <Compile Include="Caching\IfModifiedSinceResult.cs" />
     <Compile Include="Caching\IfNoneMatchResult.cs" />
     <Compile Include="Caching\IfUnmodifiedSinceResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Ranges\ControllerExtensions.cs" />
+    <Compile Include="Ranges\RangeResult.cs" />
+    <Compile Include="Ranges\Readers\ClosedRangeReader.cs" />
+    <Compile Include="Ranges\Readers\DelegateRangeReader.cs" />
+    <Compile Include="Ranges\Readers\IRangeReader.cs" />
+    <Compile Include="Ranges\Readers\IRangeReaderResolver.cs" />
+    <Compile Include="Ranges\Readers\PrefixRangeReader.cs" />
+    <Compile Include="Ranges\Readers\RangeReaderResolver.cs" />
+    <Compile Include="Ranges\Readers\RangeStream.cs" />
+    <Compile Include="Ranges\Readers\SuffixRangeReader.cs" />
+    <Compile Include="Ranges\StreamRangeResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HTTP.Extensions\HTTP.Extensions.csproj">

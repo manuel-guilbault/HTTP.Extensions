@@ -59,6 +59,16 @@ namespace HTTP.Extensions
             return result;
         }
 
+        protected string ReadWhile(Func<char, bool> predicate)
+        {
+            int end = position;
+            while (end < value.Length && predicate(value[end])) ++end;
+
+            var result = Peek(end - position);
+            position = end;
+            return result;
+        }
+
         protected void SkipWhiteSpaces()
         {
             while (!IsAtEnd() && value[position] == ' ') position++;

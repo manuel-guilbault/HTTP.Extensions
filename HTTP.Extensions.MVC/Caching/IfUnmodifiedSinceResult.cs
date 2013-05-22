@@ -9,16 +9,27 @@ namespace HTTP.Extensions.MVC.Caching
 {
     public class IfUnmodifiedSinceResult : ActionResult
     {
-        private Lazy<ActionResult> decoratedResult;
         private Lazy<DateTime> lastModified;
+        private Lazy<ActionResult> decoratedResult;
 
-        public IfUnmodifiedSinceResult(Lazy<ActionResult> decoratedResult, Lazy<DateTime> lastModified)
+        public IfUnmodifiedSinceResult(Lazy<DateTime> lastModified, Lazy<ActionResult> decoratedResult)
         {
-            if (decoratedResult == null) throw new ArgumentNullException("decoratedResult");
             if (lastModified == null) throw new ArgumentNullException("lastModified");
+            if (decoratedResult == null) throw new ArgumentNullException("decoratedResult");
 
-            this.decoratedResult = decoratedResult;
             this.lastModified = lastModified;
+            this.decoratedResult = decoratedResult;
+        }
+
+        protected virtual void ExecuteResultWhenUnmodified(ControllerContext context)
+        {
+            decoratedResult.Value.ExecuteResult(context);
+        }
+
+        protected virtual void ExecuteResultWhenModified(ControllerContext context)
+        {
+            context.HttpContext.Response.SetLastModified(lastModified.Value);
+            context.HttpContext.Response.StatusCode = 412; // Precondition Failed
         }
 
         public override void ExecuteResult(ControllerContext context)
@@ -26,13 +37,13 @@ namespace HTTP.Extensions.MVC.Caching
             if (context == null) throw new ArgumentNullException("context");
 
             var ifUnmodifiedSince = context.HttpContext.Request.GetIfUnmodifiedSince();
-            if (ifUnmodifiedSince != null && ifUnmodifiedSince > lastModified.Value)
+            if (ifUnmodifiedSince == null || lastModified.Value <= ifUnmodifiedSince)
             {
-                context.HttpContext.Response.StatusCode = 412; // Precondition Failed
+                ExecuteResultWhenUnmodified(context);
             }
             else
             {
-                decoratedResult.Value.ExecuteResult(context);
+                ExecuteResultWhenModified(context);
             }
         }
     }

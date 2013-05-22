@@ -10,18 +10,17 @@ namespace HTTP.Extensions.Caching
     {
         public static EntityTag GetETag(this HttpWebResponse response)
         {
-            var tags = response.GetEntityTags(ValidationHeaders.E_TAG);
-            return tags.Count() > 1 ? null : tags.SingleOrDefault();
+            return response.GetEntityTag(ValidationHeaders.E_TAG);
         }
 
-        public static void SetIfMatch(this HttpWebRequest request, EntityTag ifMatch)
+        public static void SetIfMatch(this HttpWebRequest request, EntityTagCondition ifMatch)
         {
             if (ifMatch == null) throw new ArgumentNullException("ifMatch");
 
             request.Headers[ValidationHeaders.IF_MATCH] = ifMatch.ToString();
         }
 
-        public static void SetIfNoneMatch(this HttpWebRequest request, EntityTag ifNoneMatch)
+        public static void SetIfNoneMatch(this HttpWebRequest request, EntityTagCondition ifNoneMatch)
         {
             if (ifNoneMatch == null) throw new ArgumentNullException("ifNoneMatch");
 

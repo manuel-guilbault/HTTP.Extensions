@@ -13,7 +13,7 @@ namespace HTTP.Extensions.Caching
         public const string IF_MATCH = "If-Match";
         public const string IF_NONE_MATCH = "If-None-Match";
 
-        public static IEnumerable<EntityTag> GetEntityTags(this HttpRequestBase request, string header)
+        public static EntityTag GetEntityTag(this HttpRequestBase request, string header)
         {
             var value = request.Headers[header];
             if (value == null) return null;
@@ -28,7 +28,7 @@ namespace HTTP.Extensions.Caching
             }
         }
 
-        public static IEnumerable<EntityTag> GetEntityTags(this HttpWebResponse response, string header)
+        public static EntityTag GetEntityTag(this HttpWebResponse response, string header)
         {
             var value = response.Headers[header];
             if (value == null) return null;
@@ -36,6 +36,36 @@ namespace HTTP.Extensions.Caching
             try
             {
                 return new EntityTagParser().Parse(value);
+            }
+            catch (ParserException)
+            {
+                return null;
+            }
+        }
+
+        public static EntityTagCondition GetEntityTagCondition(this HttpRequestBase request, string header)
+        {
+            var value = request.Headers[header];
+            if (value == null) return null;
+
+            try
+            {
+                return new EntityTagConditionParser().Parse(value);
+            }
+            catch (ParserException)
+            {
+                return null;
+            }
+        }
+
+        public static EntityTagCondition GetEntityTagCondition(this HttpWebResponse response, string header)
+        {
+            var value = response.Headers[header];
+            if (value == null) return null;
+
+            try
+            {
+                return new EntityTagConditionParser().Parse(value);
             }
             catch (ParserException)
             {

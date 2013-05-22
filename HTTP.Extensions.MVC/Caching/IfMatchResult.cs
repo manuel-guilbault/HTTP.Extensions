@@ -9,16 +9,31 @@ namespace HTTP.Extensions.MVC.Caching
 {
     public class IfMatchResult : ActionResult
     {
+        private Func<EntityTagCondition, bool> etagValidator;
+        private Lazy<EntityTag> currentETag;
         private Lazy<ActionResult> decoratedResult;
-        private Func<EntityTag[], bool> etagValidator;
 
-        public IfMatchResult(Lazy<ActionResult> decoratedResult, Func<EntityTag[], bool> etagValidator)
+        public IfMatchResult(Func<EntityTagCondition, bool> etagValidator, Lazy<EntityTag> currentETag, Lazy<ActionResult> decoratedResult)
         {
-            if (decoratedResult == null) throw new ArgumentNullException("decoratedResult");
             if (etagValidator == null) throw new ArgumentNullException("etagValidator");
+            if (currentETag == null) throw new ArgumentNullException("currentETag");
+            if (decoratedResult == null) throw new ArgumentNullException("decoratedResult");
 
-            this.decoratedResult = decoratedResult;
             this.etagValidator = etagValidator;
+            this.currentETag = currentETag;
+            this.decoratedResult = decoratedResult;
+        }
+
+        protected virtual void ExecuteResultWhenMatch(ControllerContext context)
+        {
+            context.HttpContext.Response.SetETag(currentETag.Value);
+            decoratedResult.Value.ExecuteResult(context);
+        }
+
+        protected virtual void ExecuteResultWhenNoMatch(ControllerContext context)
+        {
+            context.HttpContext.Response.StatusCode = 412; // Precondition Failed
+            context.HttpContext.Response.SetETag(currentETag.Value);
         }
 
         public override void ExecuteResult(ControllerContext context)
@@ -26,13 +41,13 @@ namespace HTTP.Extensions.MVC.Caching
             if (context == null) throw new ArgumentNullException("context");
 
             var ifMatch = context.HttpContext.Request.GetIfMatch();
-            if (ifMatch != null && ifMatch.Any() && etagValidator(ifMatch.ToArray()))
+            if (ifMatch == null || etagValidator(ifMatch))
             {
-                context.HttpContext.Response.StatusCode = 412; // Precondition Failed
+                ExecuteResultWhenMatch(context);
             }
             else
             {
-                decoratedResult.Value.ExecuteResult(context);
+                ExecuteResultWhenNoMatch(context);
             }
         }
     }
