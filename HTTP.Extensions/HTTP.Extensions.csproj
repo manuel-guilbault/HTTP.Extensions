@@ -67,9 +67,8 @@
     <Compile Include="Ranges\ContentRange.cs" />
     <Compile Include="Ranges\ContentSubRange.cs" />
     <Compile Include="Ranges\IfRange.cs" />
-    <Compile Include="Ranges\IfRangeEntityTag.cs" />
-    <Compile Include="Ranges\IfRangeLastModified.cs" />
     <Compile Include="Ranges\IfRangeParser.cs" />
+    <Compile Include="Ranges\IfRangeType.cs" />
     <Compile Include="Ranges\InstanceLength.cs" />
     <Compile Include="Ranges\PrefixSubRange.cs" />
     <Compile Include="Ranges\RangeUnitRegistry.cs" />
