@@ -1,51 +1,53 @@
-﻿using System;
+﻿using HTTP.Extensions.Parsing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace HTTP.Extensions.Caching
 {
-    public class EntityTagConditionParser : EntityTagParserBase, IHeaderParser<EntityTagCondition>
+    public class EntityTagConditionParser : IHeaderParser<EntityTagCondition>
     {
         private const string ANY_FLAG = "*";
         private const string COMMA = ",";
 
-        public EntityTagCondition Parse(string value)
-        {
-            try
-            {
-                Initialize(value);
+        private IHeaderParser<EntityTag> entityTagParser;
 
-                if (value.Trim() == ANY_FLAG)
-                {
-                    return EntityTagCondition.Any;
-                }
-                else
-                {
-                    return new EntityTagCondition(ParseEntityTags().ToArray());
-                }
-            }
-            catch (ParserException)
+        public EntityTagConditionParser()
+            : this(new EntityTagParser())
+        {
+        }
+
+        public EntityTagConditionParser(IHeaderParser<EntityTag> entityTagParser)
+        {
+            if (entityTagParser == null) throw new ArgumentNullException("entityTagParser");
+
+            this.entityTagParser = entityTagParser;
+        }
+
+        public EntityTagCondition Parse(Tokenizer tokenizer)
+        {
+            if (tokenizer.IsNext(ANY_FLAG))
             {
-                throw;
+                return EntityTagCondition.Any;
             }
-            catch (Exception e)
+            else
             {
-                throw new ParserException();
+                return new EntityTagCondition(ParseEntityTags(tokenizer).ToArray());
             }
         }
 
-        protected IEnumerable<EntityTag> ParseEntityTags()
+        protected IEnumerable<EntityTag> ParseEntityTags(Tokenizer tokenizer)
         {
-            SkipWhiteSpaces();
-            yield return ParseEntityTag();
-        
-            while (!IsAtEnd())
+            tokenizer.SkipWhiteSpaces();
+            yield return entityTagParser.Parse(tokenizer);
+
+            while (!tokenizer.IsAtEnd())
             {
-                SkipWhiteSpaces();
-                Read(COMMA);
-                SkipWhiteSpaces();
-                yield return ParseEntityTag();
+                tokenizer.SkipWhiteSpaces();
+                tokenizer.Read(COMMA);
+                tokenizer.SkipWhiteSpaces();
+                yield return entityTagParser.Parse(tokenizer);
             }
         }
     }

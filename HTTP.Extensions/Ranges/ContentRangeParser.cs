@@ -1,11 +1,12 @@
-﻿using System;
+﻿using HTTP.Extensions.Parsing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace HTTP.Extensions.Ranges
 {
-    public class ContentRangeParser : ParserBase, IHeaderParser<ContentRange>
+    public class ContentRangeParser : IHeaderParser<ContentRange>
     {
         private const string SPACE = " ";
         private const string SLASH = "/";
@@ -26,78 +27,57 @@ namespace HTTP.Extensions.Ranges
             this.units = units;
         }
 
-        public ContentRange Parse(string value)
+        public ContentRange Parse(Tokenizer tokenizer)
         {
-            try
-            {
-                Initialize(value);
+            tokenizer.SkipWhiteSpaces();
+            var unit = ParseUnit(tokenizer);
 
-                SkipWhiteSpaces();
-                var unit = ParseUnit();
+            tokenizer.Read(SPACE);
 
-                Read(SPACE);
+            tokenizer.SkipWhiteSpaces();
+            var range = ParseSubRange(tokenizer);
 
-                SkipWhiteSpaces();
-                var range = ParseSubRange();
+            tokenizer.Read(SLASH);
 
-                Read(SLASH);
+            var instanceLength = ParseInstanceLength(tokenizer);
 
-                var instanceLength = ParseInstanceLength();
-
-                if (!IsAtEnd()) throw new ParserException();
-
-                return new ContentRange(unit, range, instanceLength);
-            }
-            catch (ParserException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                throw new ParserException();
-            }
+            return new ContentRange(unit, range, instanceLength);
         }
 
-        protected RangeUnit ParseUnit()
+        protected RangeUnit ParseUnit(Tokenizer tokenizer)
         {
-            var name = ReadUntil(SPACE);
+            var name = tokenizer.ReadUntil(SPACE);
+
             var unit = units.Get(name);
-            if (unit == null) throw new ParserException();
+            if (unit == null) tokenizer.Throw(string.Format("Unknown range unit '{0}'", name));
 
             return unit;
         }
 
-        protected ContentSubRange ParseSubRange()
+        protected ContentSubRange ParseSubRange(Tokenizer tokenizer)
         {
-            if (Peek(ASTERISK))
+            if (tokenizer.IsNext(ASTERISK))
             {
-                Read(ASTERISK);
+                tokenizer.Read(ASTERISK);
                 return ContentSubRange.Unknown;
             }
 
-            var start = ReadWhile(char.IsDigit);
-            if (start == "") throw new ParserException();
+            var start = tokenizer.ReadLong();
+            tokenizer.Read(DASH);
+            var end = tokenizer.ReadLong();
 
-            Read(DASH);
-
-            var end = ReadWhile(char.IsDigit);
-            if (end == "") throw new ParserException();
-
-            return new ContentSubRange(long.Parse(start), long.Parse(end));
+            return new ContentSubRange(start, end);
         }
 
-        protected InstanceLength ParseInstanceLength()
+        protected InstanceLength ParseInstanceLength(Tokenizer tokenizer)
         {
-            if (Peek(ASTERISK))
+            if (tokenizer.IsNext(ASTERISK))
             {
-                Read(ASTERISK);
+                tokenizer.Read(ASTERISK);
                 return InstanceLength.Unknown;
             }
 
-            var value = ReadWhile(char.IsDigit);
-            if (value == "") throw new ParserException();
-
-            return new InstanceLength(long.Parse(value));
+            return new InstanceLength(tokenizer.ReadLong());
         }
     }
 }

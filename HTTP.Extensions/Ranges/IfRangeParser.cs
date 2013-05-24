@@ -1,4 +1,5 @@
 ﻿using HTTP.Extensions.Caching;
+using HTTP.Extensions.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,20 +7,29 @@ using System.Text;
 
 namespace HTTP.Extensions.Ranges
 {
-    public class IfRangeParser : EntityTagParserBase, IHeaderParser<IfRange>
+    public class IfRangeParser : IHeaderParser<IfRange>
     {
-        public IfRange Parse(string value)
-        {
-            Initialize(value);
+        private IHeaderParser<EntityTag> entityTagParser;
 
-            var lastModified = value.AsHttpDateTime();
+        public IfRangeParser(IHeaderParser<EntityTag> entityTagParser)
+        {
+            if (entityTagParser == null) throw new ArgumentNullException("entityTagParser");
+
+            this.entityTagParser = entityTagParser;
+        }
+
+        public IfRange Parse(Tokenizer tokenizer)
+        {
+            if (tokenizer == null) throw new ArgumentNullException("tokenizer");
+
+            var lastModified = tokenizer.StringValue.AsHttpDateTime();
             if (lastModified != null)
             {
                 return new IfRange(lastModified.Value);
             }
             else
             {
-                return new IfRange(ParseEntityTag());
+                return new IfRange(entityTagParser.Parse(tokenizer));
             }
         }
     }

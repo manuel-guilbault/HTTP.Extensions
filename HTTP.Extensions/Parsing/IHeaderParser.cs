@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace HTTP.Extensions
+namespace HTTP.Extensions.Parsing
 {
     public interface IHeaderParser<TResult>
     {
-        TResult Parse(string value);
+        TResult Parse(Tokenizer tokenizer);
     }
 }

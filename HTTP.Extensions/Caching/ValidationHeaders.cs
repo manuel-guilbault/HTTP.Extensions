@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HTTP.Extensions.Parsing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -20,9 +21,9 @@ namespace HTTP.Extensions.Caching
 
             try
             {
-                return new EntityTagParser().Parse(value);
+                return new HeaderReader<EntityTag>(new EntityTagParser()).Read(value);
             }
-            catch (ParserException)
+            catch (ParsingException)
             {
                 return null;
             }
@@ -35,9 +36,9 @@ namespace HTTP.Extensions.Caching
 
             try
             {
-                return new EntityTagParser().Parse(value);
+                return new HeaderReader<EntityTag>(new EntityTagParser()).Read(value);
             }
-            catch (ParserException)
+            catch (ParsingException)
             {
                 return null;
             }
@@ -50,9 +51,9 @@ namespace HTTP.Extensions.Caching
 
             try
             {
-                return new EntityTagConditionParser().Parse(value);
+                return new HeaderReader<EntityTagCondition>(new EntityTagConditionParser()).Read(value);
             }
-            catch (ParserException)
+            catch (ParsingException)
             {
                 return null;
             }
@@ -65,9 +66,9 @@ namespace HTTP.Extensions.Caching
 
             try
             {
-                return new EntityTagConditionParser().Parse(value);
+                return new HeaderReader<EntityTagCondition>(new EntityTagConditionParser()).Read(value);
             }
-            catch (ParserException)
+            catch (ParsingException)
             {
                 return null;
             }

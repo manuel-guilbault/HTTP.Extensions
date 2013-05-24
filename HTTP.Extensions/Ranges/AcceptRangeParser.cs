@@ -1,11 +1,12 @@
-﻿using System;
+﻿using HTTP.Extensions.Parsing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace HTTP.Extensions.Ranges
 {
-    public class AcceptRangeParser : ParserBase, IHeaderParser<AcceptRange>
+    public class AcceptRangeParser : IHeaderParser<AcceptRange>
     {
         private const string NONE = "none";
         private const string COMMA = ",";
@@ -24,46 +25,36 @@ namespace HTTP.Extensions.Ranges
             this.units = units;
         }
 
-        public AcceptRange Parse(string value)
+        public AcceptRange Parse(Tokenizer tokenizer)
         {
-            try
-            {
-                Initialize(value);
+            if (tokenizer == null) throw new ArgumentNullException("tokenizer");
 
-                if (value.Trim() == NONE)
-                {
-                    return AcceptRange.None;
-                }
+            if (tokenizer.IsNext(NONE))
+            {
+                return AcceptRange.None;
+            }
 
-                return new AcceptRange(ParseUnits().ToArray());
-            }
-            catch (ParserException)
+            return new AcceptRange(ParseUnits(tokenizer).ToArray());
+        }
+
+        protected IEnumerable<RangeUnit> ParseUnits(Tokenizer tokenizer)
+        {
+            yield return ParseUnit(tokenizer);
+            tokenizer.SkipWhiteSpaces();
+
+            while (!tokenizer.IsAtEnd())
             {
-                throw;
-            }
-            catch (Exception e)
-            {
-                throw new ParserException();
+                yield return ParseUnit(tokenizer);
+                tokenizer.SkipWhiteSpaces();
             }
         }
 
-        protected IEnumerable<RangeUnit> ParseUnits()
+        protected RangeUnit ParseUnit(Tokenizer tokenizer)
         {
-            yield return ParseUnit();
-            SkipWhiteSpaces();
+            var name = tokenizer.ReadUntil(COMMA);
 
-            while (!IsAtEnd())
-            {
-                yield return ParseUnit();
-                SkipWhiteSpaces();
-            }
-        }
-
-        protected RangeUnit ParseUnit()
-        {
-            var name = ReadUntil(COMMA);
             var unit = units.Get(name);
-            if (unit == null) throw new ParserException();
+            if (unit == null) tokenizer.Throw(string.Format("Unknown range unit '{0}'", name));
 
             return unit;
         }

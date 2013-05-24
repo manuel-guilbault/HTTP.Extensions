@@ -1,4 +1,6 @@
-﻿using System;
+﻿using HTTP.Extensions.Caching;
+using HTTP.Extensions.Parsing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,9 +24,9 @@ namespace HTTP.Extensions.Ranges
 
             try
             {
-                return new RangeParser(units).Parse(value);
+                return new HeaderReader<Range>(new RangeParser(RangeUnitRegistry.Default)).Read(value);
             }
-            catch (ParserException)
+            catch (ParsingException)
             {
                 return null;
             }
@@ -51,9 +53,9 @@ namespace HTTP.Extensions.Ranges
 
             try
             {
-                return new IfRangeParser().Parse(value);
+                return new HeaderReader<IfRange>(new IfRangeParser(new EntityTagParser())).Read(value);
             }
-            catch (ParserException)
+            catch (ParsingException)
             {
                 return null;
             }

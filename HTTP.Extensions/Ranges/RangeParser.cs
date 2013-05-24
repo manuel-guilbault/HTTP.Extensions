@@ -1,18 +1,19 @@
-﻿using System;
+﻿using HTTP.Extensions.Parsing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace HTTP.Extensions.Ranges
 {
-    public class RangeParser : ParserBase, IHeaderParser<Range>
+    public class RangeParser : IHeaderParser<Range>
     {
         private const string EQUAL = "=";
         private const string COMMA = ",";
         private const string DASH = "-";
 
         private RangeUnitRegistry units;
-
+        
         public RangeParser(RangeUnitRegistry units)
         {
             if (units == null) throw new ArgumentNullException("units");
@@ -20,82 +21,67 @@ namespace HTTP.Extensions.Ranges
             this.units = units;
         }
 
-        public Range Parse(string value)
+        public Range Parse(Tokenizer tokenizer)
         {
-            try
-            {
-                Initialize(value);
+            if (tokenizer == null) throw new ArgumentNullException("tokenizer");
 
-                SkipWhiteSpaces();
-                var unit = ParseUnit();
+            tokenizer.SkipWhiteSpaces();
+            var unit = ParseUnit(tokenizer);
 
-                SkipWhiteSpaces();
-                Read(EQUAL);
+            tokenizer.SkipWhiteSpaces();
+            tokenizer.Read(EQUAL);
 
-                var ranges = ParseRanges().ToArray();
+            var ranges = ParseRanges(tokenizer).ToArray();
 
-                return new Range(unit, ranges);
-            }
-            catch (ParserException)
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                throw new ParserException();
-            }
+            return new Range(unit, ranges);
         }
 
-        protected RangeUnit ParseUnit()
+        protected RangeUnit ParseUnit(Tokenizer tokenizer)
         {
-            var unitName = ReadUntil(EQUAL);
+            var unitName = tokenizer.ReadUntil(EQUAL);
 
             var unit = units.Get(unitName);
-            if (unit == null) throw new ParserException();
+            if (unit == null) tokenizer.Throw(string.Format("Unknown range unit '{0}'", unitName));
 
             return unit;
         }
 
-        protected IEnumerable<ISubRange> ParseRanges()
+        protected IEnumerable<ISubRange> ParseRanges(Tokenizer tokenizer)
         {
-            yield return ParseRange();
+            yield return ParseRange(tokenizer);
 
-            while (!IsAtEnd())
+            while (!tokenizer.IsAtEnd())
             {
-                SkipWhiteSpaces();
-                Read(COMMA);
+                tokenizer.SkipWhiteSpaces();
+                tokenizer.Read(COMMA);
 
-                SkipWhiteSpaces();
-                yield return ParseRange();
+                tokenizer.SkipWhiteSpaces();
+                yield return ParseRange(tokenizer);
             }
         }
 
-        protected ISubRange ParseRange()
+        protected ISubRange ParseRange(Tokenizer tokenizer)
         {
-            if (Peek(DASH))
+            if (tokenizer.IsNext(DASH))
             {
-                return ParseSuffixRange();
+                return ParseSuffixRange(tokenizer);
             }
-            
-            var start = ReadWhile(char.IsDigit);
-            if (start == "") throw new ParserException();
 
-            Read(DASH);
+            var start = tokenizer.ReadLong();
+            tokenizer.Read(DASH);
+            var end = tokenizer.TryReadLong();
 
-            var end = ReadWhile(char.IsDigit);
-            return end == ""
-                ? (ISubRange)new PrefixSubRange(long.Parse(start))
-                : (ISubRange)new ClosedSubRange(long.Parse(start), long.Parse(end));
+            return end == null
+                ? (ISubRange)new PrefixSubRange(start)
+                : (ISubRange)new ClosedSubRange(start, end.Value);
         }
 
-        protected SuffixSubRange ParseSuffixRange()
+        protected SuffixSubRange ParseSuffixRange(Tokenizer tokenizer)
         {
-            Read(DASH);
+            tokenizer.Read(DASH);
+            var end = tokenizer.ReadLong();
 
-            var end = ReadWhile(char.IsDigit);
-            if (end == "") throw new ParserException();
-
-            return new SuffixSubRange(long.Parse(end));
+            return new SuffixSubRange(end);
         }
     }
 }
