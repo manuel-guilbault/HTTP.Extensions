@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Web
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTTP.Extensions", "HTTP.Extensions\HTTP.Extensions.csproj", "{08402AED-E31C-4E78-B6E7-8F6717EE513F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{08402AED-E31C-4E78-B6E7-8F6717EE513F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08402AED-E31C-4E78-B6E7-8F6717EE513F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08402AED-E31C-4E78-B6E7-8F6717EE513F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08402AED-E31C-4E78-B6E7-8F6717EE513F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
